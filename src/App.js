@@ -16,6 +16,7 @@ function App() {
   const web3 = new Web3(new Web3.providers.HttpProvider(rpc, {timeout: 15000}));
   // const swapContract = await new web3.eth.Contract(sushiSwapAbi, swapAddress);
 
+  const [account, setAccount] = useState('');
   const [token1Address, setToken1Address] = useState('');
   const [token2Address, setToken2Address] = useState('');
   const [token1Amount, setToken1Amount] = useState('');
@@ -23,12 +24,16 @@ function App() {
   const [token2Decimals, setToken2Decimals] = useState('');
   const [token2Amount, setToken2Amount] = useState('');
 
-  // const onClickApprove1 = useCallback(async() => {
-  //   const token1Contract = await new web3.eth.Contract(erc20, token1Address);
-  //   const token1Decimals = await token1Contract.methods.decimals().call();
-  //   const amount = token1Amount * (10 ** Number(token1Decimals));
-  //   await token1Contract.methods.approve(swapAddress, amount.toString()).send({from: 's', gasLimit:300000 });
-  // }, [token1Address, token1Amount]);
+  const onClickApprove1 = useCallback(async() => {
+    const token1Contract = await new web3.eth.Contract(erc20, token1Address);
+    const token1Decimals = await token1Contract.methods.decimals().call();
+    await web3.eth.accounts.wallet.add(account);
+
+    console.log(token1Decimals);
+    const amount = token1Amount * (10 ** Number(token1Decimals));
+    console.log(account, );
+    await token1Contract.methods.approve(swapAddress, amount.toString()).send({from: account});
+  }, [token1Address, token1Amount]);
 
   // const onClickApprove2 = useCallback(async() => {
   //   const token2Contract = await new web3.eth.Contract(erc20, token2Address);
@@ -41,6 +46,9 @@ function App() {
 
   return (
     <div className="App">
+      <div className="flex">
+        <Input value={account} onChange={(e) => {setAccount(e.target.value)}}/>
+      </div>
       <div className={'flex'}>
         <div className={'container'}>
           <p>代币地址</p>
@@ -60,7 +68,7 @@ function App() {
         </div>
       </div>
       <div className="flex1">
-        <Button type="primary" block classNames="btn">授权</Button>
+        <Button type="primary" block onClick={onClickApprove1} classNames="btn">授权</Button>
       </div>
       <div className={'flex'}>
         <div className={'container'}>
